@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Streak Tracker</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 0%, #1a162e, #0c0a14);
+            --card-bg: rgba(26, 22, 46, 0.45);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --card-border-hover: rgba(167, 139, 250, 0.3);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-primary: #a78bfa;
+            --accent-secondary: #ec4899;
+            --btn-gradient: linear-gradient(135deg, #a78bfa, #8b5cf6);
+            --btn-gradient-hover: linear-gradient(135deg, #c084fc, #a78bfa);
+            --btn-increment: linear-gradient(135deg, #10b981, #059669);
+            --btn-increment-hover: linear-gradient(135deg, #34d399, #10b981);
+            --glow-color: rgba(167, 139, 250, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Header section */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo-section h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Stats Summary Card */
+        .stats-hero {
+            background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(236, 72, 153, 0.05));
+            border: 1px solid rgba(167, 139, 250, 0.15);
+            border-radius: 24px;
+            padding: 28px 36px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .stats-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stats-label {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .stats-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .stats-value span.days-word {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--btn-gradient);
+            color: #ffffff;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
+            background: var(--btn-gradient-hover);
+        }
+
+        .btn-add:active {
+            transform: translateY(1px);
+        }
+
+        /* Streak Grid / List */
+        .streaks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            width: 100%;
+        }
+
+        .streak-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+        }
+
+        .streak-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 20px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .streak-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--card-border-hover);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), 0 0 20px var(--glow-color);
+        }
+
+        .streak-card-header {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .skill-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        .streak-metric {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .streak-number-wrapper {
+            background: rgba(167, 139, 250, 0.1);
+            border: 1px solid rgba(167, 139, 250, 0.2);
+            border-radius: 12px;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .streak-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #c084fc;
+        }
+
+        .streak-days-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .btn-increment {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--btn-increment);
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-increment:hover {
+            background: var(--btn-increment-hover);
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-increment:active {
+            transform: scale(0.98);
+        }
+
+        /* Empty state styling */
+        .empty-state {
+            grid-column: 1 / -1;
+            background: var(--card-bg);
+            border: 2px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 60px 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            backdrop-filter: blur(12px);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .empty-state h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Responsive styling */
+        @media (max-width: 600px) {
+            .stats-hero {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            .btn-add {
+                width: 100%;
+                justify-content: center;
+            }
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-section">
+                <h1>📚 StreakTracker</h1>
+            </div>
+        </header>
+
+        <section class="stats-hero">
+            <div class="stats-info">
+                <span class="stats-label">Grand Total Progress</span>
+                <div class="stats-value">
+                    {{ total_days }} <span class="days-word">Days learning</span>
+                </div>
+            </div>
+            <a href="/add" class="btn-add">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Skill
+            </a>
+        </section>
+
+        <section class="streaks-grid">
+            {% for streak in streaks %}
+            <div class="streak-card">
+                <div class="streak-card-header">
+                    <h2 class="skill-name">{{ streak.skill }}</h2>
+                    <div class="streak-metric">
+                        <div class="streak-number-wrapper">
+                            <span class="streak-number">{{ streak.days }}</span>
+                        </div>
+                        <span class="streak-days-label">day streak🔥</span>
+                    </div>
+                </div>
+                <div class="streak-card-actions">
+                    <a href="/increase/{{ streak.skill }}" class="btn-increment">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        +1 Day
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">🎯</div>
+                <h3>No skills tracked yet</h3>
+                <p>Start your learning journey by tracking your first skill streak! Click "Add New Skill" to begin.</p>
+            </div>
+            {% endfor %}
+        </section>
+    </div>
+</body>
+</html>
